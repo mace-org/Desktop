@@ -6,6 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -21,16 +22,9 @@ namespace Desktop.Infrastructures
 
     public record KeyboardInput(KeyboardInputType Type, Keys VkCode, uint ScanCode, uint Time);
 
-    public class WindowsHooks : IDisposable
+    public class KeyboardHook : Hook<KeyboardInput>
     {
-        private CompositeDisposable _disposables = new CompositeDisposable();
-
-        public WindowsHooks()
-        {
-            KeyboardInputs = Observable.Create<KeyboardInput>(WatchKeyboard).Publish().RefCount();
-        }
-
-        private IDisposable WatchKeyboard(IObserver<KeyboardInput> observer)
+        protected override IDisposable WatchInput(IObserver<KeyboardInput> observer)
         {
             var proc = new NativeApi.HookProc((int nCode, int wParam, IntPtr lParam) =>
             {
@@ -43,6 +37,7 @@ namespace Desktop.Infrastructures
                 return NativeApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
             });
 
+            //var hModule = Process.GetCurrentProcess().MainModule.BaseAddress;
             var hHook = NativeApi.SetWindowsHookEx(NativeApi.WH_KEYBOARD_LL, proc, IntPtr.Zero, 0);
             Trace.WriteLine($"Set low level keyboard hook: {hHook}.");
 
@@ -52,7 +47,7 @@ namespace Desktop.Infrastructures
                 return Disposable.Empty;
             }
 
-            var disposable = Disposable.Create(() =>
+            return Disposable.Create(() =>
             {
                 var result = NativeApi.UnhookWindowsHookEx(hHook);
                 Trace.WriteLine($"Unhook low level keyboard hook({hHook}): {result}.");
@@ -66,21 +61,6 @@ namespace Desktop.Infrastructures
                     observer.OnError(NativeApi.GetLastException());
                 }
             });
-            _disposables.Add(disposable);
-
-            return Disposable.Create(() =>
-            {
-                _disposables.Remove(disposable);
-            });
-
         }
-
-        public void Dispose()
-        {
-            ((IDisposable)_disposables).Dispose();
-        }
-
-        public IObservable<KeyboardInput> KeyboardInputs { get; }
-
     }
 }

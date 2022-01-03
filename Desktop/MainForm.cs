@@ -1,5 +1,4 @@
 ﻿using Desktop.Infrastructures;
-using Desktop.Infrastructures.Hooks;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,19 +16,16 @@ namespace Desktop
 {
     public partial class MainForm : Form
     {
-        ///private KeyboardHook _keyboardHook;
-
-        private WindowsHooks _hooks;
-
-        private SingleAssignmentDisposable _disposable;
+        private KeyboardHook _keyboardHooks;
+        private MouseHook _mouseHook;
 
         public MainForm()
         {
             InitializeComponent();
 
             //_keyboardHook = new KeyboardHook();
-            _hooks = new WindowsHooks();
-            _disposable = new SingleAssignmentDisposable();
+            _keyboardHooks = new KeyboardHook();
+            _mouseHook = new MouseHook();
         }
 
         private void Call(Action action)
@@ -48,29 +44,43 @@ namespace Desktop
         {
             base.OnClosed(e);
 
-            _disposable.Dispose();
-            _hooks.Dispose();
+            _keyboardHooks.Dispose();
+            _mouseHook.Dispose();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Call(() =>
+            _keyboardHooks.Inputs.Subscribe(a =>
             {
-                _disposable.Disposable = _hooks.KeyboardInputs.Subscribe(a =>
-                {
-                    Trace.WriteLine($"Keyboard input: {a}.");
-                    //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
-                });
+                Trace.WriteLine($"Keyboard input: {a}.");
+                //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
+            });
+            _mouseHook.Inputs.Subscribe(a =>
+            {
+                Trace.WriteLine($"Mouse input: {a}.");
+                //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
             });
 
-           
+            //Call(() =>
+            //{
+            //    _disposable.Disposable = _hooks.KeyboardInputs.Subscribe(a =>
+            //    {
+            //        Trace.WriteLine($"Keyboard input: {a}.");
+            //        //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
+            //    });
+            //});
+
+
             //Call(() => _keyboardHook.Install());
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
-            _disposable.Dispose();
-            _disposable = new SingleAssignmentDisposable();
+            _keyboardHooks.Dispose();
+            _mouseHook.Dispose();
+
+            //_disposable.Dispose();
+            //_disposable = new SingleAssignmentDisposable();
             //Call(() => _keyboardHook.Uninstall());
         }
     }
