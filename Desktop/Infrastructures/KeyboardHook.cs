@@ -22,45 +22,18 @@ namespace Desktop.Infrastructures
 
     public record KeyboardInput(KeyboardInputType Type, Keys VkCode, uint ScanCode, uint Time);
 
-    public class KeyboardHook : Hook<KeyboardInput>
+    public class KeyboardHook : WindowsHook<KeyboardInput>
     {
-        protected override IDisposable WatchInput(IObserver<KeyboardInput> observer)
+        public KeyboardHook() : base(NativeApi.WH_KEYBOARD_LL, "low level keyboard")
         {
-            var proc = new NativeApi.HookProc((int nCode, int wParam, IntPtr lParam) =>
-            {
-                if (nCode >= 0)
-                {
-                    var input = Marshal.PtrToStructure<NativeApi.KBDLLHOOKSTRUCT>(lParam);
-                    var args = new KeyboardInput((KeyboardInputType)wParam, (Keys)input.vkCode, input.scanCode, input.time);
-                    observer.OnNext(args);
-                }
-                return NativeApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
-            });
-
-            //var hModule = Process.GetCurrentProcess().MainModule.BaseAddress;
-            var hHook = NativeApi.SetWindowsHookEx(NativeApi.WH_KEYBOARD_LL, proc, IntPtr.Zero, 0);
-            Trace.WriteLine($"Set low level keyboard hook: {hHook}.");
-
-            if (hHook == IntPtr.Zero)
-            {
-                observer.OnError(NativeApi.GetLastException());
-                return Disposable.Empty;
-            }
-
-            return Disposable.Create(() =>
-            {
-                var result = NativeApi.UnhookWindowsHookEx(hHook);
-                Trace.WriteLine($"Unhook low level keyboard hook({hHook}): {result}.");
-
-                if (result)
-                {
-                    observer.OnCompleted();
-                }
-                else
-                {
-                    observer.OnError(NativeApi.GetLastException());
-                }
-            });
         }
+
+        protected override KeyboardInput CreateMessage(int wParam, IntPtr lParam)
+        {
+            var input = Marshal.PtrToStructure<NativeApi.KBDLLHOOKSTRUCT>(lParam);
+            var args = new KeyboardInput((KeyboardInputType)wParam, (Keys)input.vkCode, input.scanCode, input.time);
+            return args;
+        }
+
     }
 }

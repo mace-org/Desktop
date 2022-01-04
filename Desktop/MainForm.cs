@@ -50,12 +50,12 @@ namespace Desktop
 
         private void button1_Click(object sender, EventArgs e)
         {
-            _keyboardHooks.Inputs.Subscribe(a =>
+            _keyboardHooks.Messages.Subscribe(a =>
             {
                 Trace.WriteLine($"Keyboard input: {a}.");
                 //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
             });
-            _mouseHook.Inputs.Subscribe(a =>
+            _mouseHook.Messages.Subscribe(a =>
             {
                 Trace.WriteLine($"Mouse input: {a}.");
                 //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });

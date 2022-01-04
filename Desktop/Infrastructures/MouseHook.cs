@@ -26,45 +26,17 @@ namespace Desktop.Infrastructures
 
     public record MouseInput(MouseInputType Type, Point Position, uint MouseData, uint Time);
 
-    public class MouseHook : Hook<MouseInput>
+    public class MouseHook : WindowsHook<MouseInput>
     {
-        protected override IDisposable WatchInput(IObserver<MouseInput> observer)
+        public MouseHook() : base(NativeApi.WH_MOUSE_LL, "low level mouse")
         {
-            var proc = new NativeApi.HookProc((int nCode, int wParam, IntPtr lParam) =>
-            {
-                if (nCode >= 0)
-                {
-                    var input = Marshal.PtrToStructure<NativeApi.MSLLHOOKSTRUCT>(lParam);
-                    var args = new MouseInput((MouseInputType)wParam, new Point(input.pt.x, input.pt.y), input.mouseData, input.time);
-                    observer.OnNext(args);
-                }
-                return NativeApi.CallNextHookEx(IntPtr.Zero, nCode, wParam, lParam);
-            });
+        }
 
-            //var hModule = Process.GetCurrentProcess().MainModule.BaseAddress;
-            var hHook = NativeApi.SetWindowsHookEx(NativeApi.WH_MOUSE_LL, proc, IntPtr.Zero, 0);
-            Trace.WriteLine($"Set low level mouse hook: {hHook}.");
-
-            if (hHook == IntPtr.Zero)
-            {
-                observer.OnError(NativeApi.GetLastException());
-                return Disposable.Empty;
-            }
-
-            return Disposable.Create(() =>
-            {
-                var result = NativeApi.UnhookWindowsHookEx(hHook);
-                Trace.WriteLine($"Unhook low level mouse hook({hHook}): {result}.");
-
-                if (result)
-                {
-                    observer.OnCompleted();
-                }
-                else
-                {
-                    observer.OnError(NativeApi.GetLastException());
-                }
-            });
+        protected override MouseInput CreateMessage(int wParam, IntPtr lParam)
+        {
+            var input = Marshal.PtrToStructure<NativeApi.MSLLHOOKSTRUCT>(lParam);
+            var args = new MouseInput((MouseInputType)wParam, new Point(input.pt.x, input.pt.y), input.mouseData, input.time);
+            return args;
         }
     }
 }
