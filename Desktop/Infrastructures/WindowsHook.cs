@@ -23,10 +23,10 @@ namespace Desktop.Infrastructures
             HookId = hookId;
             HookName = hookName;
             
-            Messages = Observable.Create<TMessage>(observer => _disposable = WatchInput(observer)).Publish().RefCount();
+            Messages = Observable.Create<TMessage>(observer => _disposable = InstallHook(observer)).Publish().RefCount();
         }
 
-        private IDisposable WatchInput(IObserver<TMessage> observer)
+        private IDisposable InstallHook(IObserver<TMessage> observer)
         {
             _hookProc = new NativeApi.HookProc((int nCode, int wParam, IntPtr lParam) =>
             {
