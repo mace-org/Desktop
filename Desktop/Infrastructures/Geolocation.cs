@@ -18,12 +18,22 @@ namespace Desktop.Infrastructures
         void ILocationEvents.OnLocationChanged(ref Guid reportType, ILocationReport pLocationReport)
         {
             Debug.WriteLine($"Location Changed: {reportType}, {pLocationReport.GetSensorID()}, {pLocationReport.GetTimestamp()}, {pLocationReport}");
-            if(reportType == _latLongReportId)
+            if (reportType == _latLongReportId)
             {
                 var latLongReport = pLocationReport as ILatLongReport;
                 Debug.WriteLine($"Lat Long Report -- Altitude: {latLongReport.GetAltitude()}, AltitudeError: {latLongReport.GetAltitudeError()}, ErrorRadius: {latLongReport.GetErrorRadius()}, Latitude: {latLongReport.GetLatitude()}, Longitude: {latLongReport.GetLongitude()}");
+
+                var civicAddressReport = pLocationReport as ICivicAddressReport;
+                Debug.WriteLine($"{civicAddressReport == null}");
+
+                var pKey = new _tagpropertykey { fmtid = new Guid("055C74D8-CA6F-47D6-95C6-1ED3637A0FF4"), pid = 28 };
+                var pVal = pLocationReport.GetValue(ref pKey);
+                if(pVal.vt == 0x1F)
+                {
+                    
+                }
             }
-            else if(reportType == _civicAddressReportId)
+            else if (reportType == _civicAddressReportId)
             {
                 var civicAddressReport = pLocationReport as ICivicAddressReport;
                 Debug.WriteLine($"Civic Address Report -- AddressLine1: {civicAddressReport.GetAddressLine1()}, AddressLine2: {civicAddressReport.GetAddressLine2()}, City: {civicAddressReport.GetCity()}, CountryRegion: {civicAddressReport.GetCountryRegion()}, DetailLevel: {civicAddressReport.GetDetailLevel()}, PostalCode: {civicAddressReport.GetPostalCode()}, StateProvince: {civicAddressReport.GetStateProvince()}");
@@ -37,30 +47,31 @@ namespace Desktop.Infrastructures
 
         public void Start()
         {
-            if(_location == null)
+            if (_location == null)
             {
                 _location = new LocationClass();
 
+                _location.SetDesiredAccuracy(ref _latLongReportId, LOCATION_DESIRED_ACCURACY.LOCATION_DESIRED_ACCURACY_HIGH);
                 _location.RegisterForReport(this, ref _latLongReportId, 0);
-                var llacc = _location.GetDesiredAccuracy(ref _latLongReportId);
-                var llint = _location.GetReportInterval(ref _latLongReportId);
+                //var llacc = _location.GetDesiredAccuracy(ref _latLongReportId);
+                //var llint = _location.GetReportInterval(ref _latLongReportId);
 
-                Debug.WriteLine($"Location Report -- accuracy: {llacc}, interval: {llint}");
+                //Debug.WriteLine($"Location Report -- accuracy: {llacc}, interval: {llint}");
 
-                _location.RegisterForReport(this, ref _civicAddressReportId, 0);
-                var caacc = _location.GetDesiredAccuracy(ref _civicAddressReportId);
-                var caint = _location.GetReportInterval(ref _civicAddressReportId);
+                //_location.RegisterForReport(this, ref _civicAddressReportId, 0);
+                //var caacc = _location.GetDesiredAccuracy(ref _civicAddressReportId);
+                //var caint = _location.GetReportInterval(ref _civicAddressReportId);
 
-                Debug.WriteLine($"Civic Address Report -- accuracy: {caacc}, interval: {caint}");
+                //Debug.WriteLine($"Civic Address Report -- accuracy: {caacc}, interval: {caint}");
             }
         }
 
         public void Stop()
         {
-            if(_location != null)
+            if (_location != null)
             {
-                 _location.UnregisterForReport(ref _latLongReportId);
-               _location.UnregisterForReport(ref _civicAddressReportId);
+                _location.UnregisterForReport(ref _latLongReportId);
+                //_location.UnregisterForReport(ref _civicAddressReportId);
                 _location = null;
             }
         }
