@@ -19,6 +19,8 @@ namespace Desktop
         private KeyboardHook _keyboardHooks;
         private MouseHook _mouseHook;
 
+        private Geolocation _geolocation;
+
         public MainForm()
         {
             InitializeComponent();
@@ -26,6 +28,8 @@ namespace Desktop
             //_keyboardHook = new KeyboardHook();
             _keyboardHooks = new KeyboardHook();
             _mouseHook = new MouseHook();
+
+            _geolocation = new Geolocation();
         }
 
         private void Call(Action action)
@@ -50,6 +54,10 @@ namespace Desktop
 
         private void button1_Click(object sender, EventArgs e)
         {
+            _geolocation.Start();
+
+            return;
+
             _keyboardHooks.Messages.Subscribe(a =>
             {
                 Trace.WriteLine($"Keyboard input: {a}.");
@@ -76,6 +84,9 @@ namespace Desktop
 
         private void button2_Click(object sender, EventArgs e)
         {
+            _geolocation.Stop();
+            return;
+
             _keyboardHooks.Dispose();
             _mouseHook.Dispose();
 
@@ -84,29 +95,30 @@ namespace Desktop
             //Call(() => _keyboardHook.Uninstall());
         }
 
-        static void ResolveAddressSync()
-        {
-            GeoCoordinateWatcher watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
-            watcher.MovementThreshold = 1.0; // set to one meter
-            watcher.TryStart(false, TimeSpan.FromMilliseconds(1000));
+        //static void ResolveAddressSync()
+        //{
+        //    ILocation;
+        //    GeoCoordinateWatcher watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+        //    watcher.MovementThreshold = 1.0; // set to one meter
+        //    watcher.TryStart(false, TimeSpan.FromMilliseconds(1000));
 
-            CivicAddressResolver resolver = new CivicAddressResolver();
+        //    CivicAddressResolver resolver = new CivicAddressResolver();
 
-            if (watcher.Position.Location.IsUnknown == false)
-            {
-                CivicAddress address = resolver.ResolveAddress(watcher.Position.Location);
+        //    if (watcher.Position.Location.IsUnknown == false)
+        //    {
+        //        CivicAddress address = resolver.ResolveAddress(watcher.Position.Location);
 
-                if (!address.IsUnknown)
-                {
-                    Console.WriteLine("Country: {0}, Zip: {1}",
-                            address.CountryRegion,
-                            address.PostalCode);
-                }
-                else
-                {
-                    Console.WriteLine("Address unknown.");
-                }
-            }
-        }
+        //        if (!address.IsUnknown)
+        //        {
+        //            Console.WriteLine("Country: {0}, Zip: {1}",
+        //                    address.CountryRegion,
+        //                    address.PostalCode);
+        //        }
+        //        else
+        //        {
+        //            Console.WriteLine("Address unknown.");
+        //        }
+        //    }
+        //}
     }
 }
