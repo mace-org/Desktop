@@ -17,18 +17,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="LocationApiLib">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>4486df98-22a5-4f6b-bd5c-8cadcec0a6de</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>false</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 

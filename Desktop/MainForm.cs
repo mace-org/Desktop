@@ -1,4 +1,5 @@
 ﻿using Desktop.Infrastructures;
+using Desktop.Infrastructures.Location;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -50,11 +51,13 @@ namespace Desktop
 
             _keyboardHooks.Dispose();
             _mouseHook.Dispose();
+            _geolocation.Dispose();
+
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            _geolocation.Start();
+            var pos = _geolocation.GetCurrentPosition();
 
             return;
 
@@ -84,7 +87,6 @@ namespace Desktop
 
         private void button2_Click(object sender, EventArgs e)
         {
-            _geolocation.Stop();
             return;
 
             _keyboardHooks.Dispose();
