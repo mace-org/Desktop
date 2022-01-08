@@ -1,4 +1,5 @@
 ﻿using Desktop.Infrastructures;
+using Desktop.Infrastructures.Hooks;
 using Desktop.Infrastructures.Location;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,15 +24,18 @@ namespace Desktop
 
         private Geolocation _geolocation;
 
+        private CompositeDisposable _disposables;
+
         public MainForm()
         {
             InitializeComponent();
 
-            //_keyboardHook = new KeyboardHook();
             _keyboardHooks = new KeyboardHook();
             _mouseHook = new MouseHook();
 
-            _geolocation = new Geolocation();
+            _geolocation = new Geolocation(true, 5000);
+
+            _disposables = new CompositeDisposable();
         }
 
         private void Call(Action action)
@@ -49,78 +54,41 @@ namespace Desktop
         {
             base.OnClosed(e);
 
-            _keyboardHooks.Dispose();
-            _mouseHook.Dispose();
-            _geolocation.Dispose();
-
+            _disposables.Dispose();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            var pos = _geolocation.GetCurrentPosition();
-
+            _geolocation.Positions.Take(4).Subscribe(a =>
+            {
+                Trace.WriteLine(a);
+            });
             return;
 
-            _keyboardHooks.Messages.Subscribe(a =>
+            //var post = _geolocation.GetCurrentAddress();
+            ////var pos = _geolocation.GetCurrentPosition(); //.GetCurrentAddress(); //.GetCurrentPosition();
+
+            //return;
+
+
+            var dispose = _keyboardHooks.Messages.Subscribe(a =>
             {
                 Trace.WriteLine($"Keyboard input: {a}.");
-                //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
             });
-            _mouseHook.Messages.Subscribe(a =>
+            _disposables.Add(dispose);
+
+            dispose = _mouseHook.Messages.Subscribe(a =>
             {
                 Trace.WriteLine($"Mouse input: {a}.");
-                //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
             });
+            _disposables.Add(dispose);
 
-            //Call(() =>
-            //{
-            //    _disposable.Disposable = _hooks.KeyboardInputs.Subscribe(a =>
-            //    {
-            //        Trace.WriteLine($"Keyboard input: {a}.");
-            //        //File.AppendAllLines("d:\\keyboard_hook.txt", new string[] { a.ToString() });
-            //    });
-            //});
-
-
-            //Call(() => _keyboardHook.Install());
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            _disposables.Clear();
             return;
-
-            _keyboardHooks.Dispose();
-            _mouseHook.Dispose();
-
-            //_disposable.Dispose();
-            //_disposable = new SingleAssignmentDisposable();
-            //Call(() => _keyboardHook.Uninstall());
         }
-
-        //static void ResolveAddressSync()
-        //{
-        //    ILocation;
-        //    GeoCoordinateWatcher watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
-        //    watcher.MovementThreshold = 1.0; // set to one meter
-        //    watcher.TryStart(false, TimeSpan.FromMilliseconds(1000));
-
-        //    CivicAddressResolver resolver = new CivicAddressResolver();
-
-        //    if (watcher.Position.Location.IsUnknown == false)
-        //    {
-        //        CivicAddress address = resolver.ResolveAddress(watcher.Position.Location);
-
-        //        if (!address.IsUnknown)
-        //        {
-        //            Console.WriteLine("Country: {0}, Zip: {1}",
-        //                    address.CountryRegion,
-        //                    address.PostalCode);
-        //        }
-        //        else
-        //        {
-        //            Console.WriteLine("Address unknown.");
-        //        }
-        //    }
-        //}
     }
 }

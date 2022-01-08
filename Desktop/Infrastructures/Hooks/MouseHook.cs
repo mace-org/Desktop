@@ -11,7 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace Desktop.Infrastructures
+namespace Desktop.Infrastructures.Hooks
 {
     public enum MouseInputType
     {

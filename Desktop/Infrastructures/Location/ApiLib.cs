@@ -36,56 +36,14 @@ namespace Desktop.Infrastructures.Location.ApiLib
 	}
 
 	[StructLayout(LayoutKind.Explicit, Size = 24)]
-	public struct PROPVARIANT:IDisposable
+	public struct PROPVARIANT
 	{
 		[FieldOffset(0)]
 		public VarEnum vt;
 		[FieldOffset(8)]
-		private double dblVal;
+		public double dblVal;
 		[FieldOffset(8)]
-		private IntPtr other;
-
-        [DllImport("Ole32")]
-		private static extern void PropVariantClear(PROPVARIANT pvar);
-
-        private void Dispose(bool disposing)
-        {
-			Clear();
-        }
-
-        //~PROPVARIANT()
-        //{
-        //    // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-        //    Dispose(disposing: false);
-        //}
-
-        public void Dispose()
-        {
-            // 不要更改此代码。请将清理代码放入“Dispose(bool disposing)”方法中
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-		[SecuritySafeCritical]
-		public void Clear()
-		{
-			if (vt != 0)
-			{
-				PropVariantClear(this);
-				vt = VarEnum.VT_EMPTY;
-			}
-		}
-
-		[SecuritySafeCritical]
-		public object GetValue()
-		{
-			return vt switch
-			{
-				VarEnum.VT_R8 => dblVal,
-				VarEnum.VT_LPWSTR => Marshal.PtrToStringUni(other),
-				_ => null,
-			};
-		}
+		public IntPtr other;
 	}
 
 	public enum LOCATION_REPORT_STATUS
