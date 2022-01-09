@@ -1,4 +1,4 @@
-﻿using Desktop.Infrastructures.Location.ApiLib;
+﻿using Desktop.Infrastructures.Native.LocationApi;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Desktop.Infrastructures.Hooks
+namespace Desktop.Infrastructures.Native
 {
     public static class NativeApi
     {

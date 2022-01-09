@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Desktop.Infrastructures.Native;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -11,11 +12,6 @@ namespace Desktop.Infrastructures.Hooks
 {
     public abstract class WindowsHook<TMessage>
     {
-        ///// <summary>
-        ///// 做为成员变量，防止 GC 回收
-        ///// </summary>
-        //private NativeApi.HookProc _hookProc;
-
         protected WindowsHook(int hookId, string hookName)
         {
             HookId = hookId;
@@ -52,6 +48,7 @@ namespace Desktop.Infrastructures.Hooks
 
             return Disposable.Create(() =>
             {
+                // 此处的目的是持有 hookProc 变量的引用，防止 GC 过早回收
                 hookProc = null;
                 var result = NativeApi.UnhookWindowsHookEx(hHook);
                 Trace.WriteLine($"Unhook {HookName} hook({hHook}): {result}.");

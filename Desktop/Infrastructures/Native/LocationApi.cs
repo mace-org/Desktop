@@ -7,7 +7,7 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Desktop.Infrastructures.Location.ApiLib
+namespace Desktop.Infrastructures.Native.LocationApi
 {
 	[StructLayout(LayoutKind.Sequential, Pack = 2)]
 	public struct SYSTEMTIME
