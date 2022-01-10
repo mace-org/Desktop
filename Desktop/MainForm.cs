@@ -1,6 +1,7 @@
 ﻿using Desktop.Infrastructures;
 using Desktop.Infrastructures.Hooks;
 using Desktop.Infrastructures.Location;
+using Desktop.Infrastructures.QWeather;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -57,8 +58,13 @@ namespace Desktop
             _disposables.Dispose();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
+            var qwc = new QWeatherClient("https://devapi.qweather.com/v7/weather/", "20d61e66d1d64012849589fc6ce6ea06", "101010100");
+            var r = await qwc.GetNowAsync();
+            Trace.WriteLine(r);
+            return;
+
             _geolocation.Positions.Take(4).Subscribe(a =>
             {
                 Trace.WriteLine(a);
